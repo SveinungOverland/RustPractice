@@ -1,3 +1,6 @@
+#![feature(generators)]
+
+use gen_iter::gen_iter;
 use std::time::{ Instant };
 
 /**
@@ -18,6 +21,26 @@ fn main() {
 }
 
 fn naive() -> i32 {
-    // TODO: DO
-    1
+    gen_iter!({
+        let (mut a, mut b) = (999, 999);
+        loop {
+            yield a * b;
+            b = b - 1;
+            if b == 0 {
+                a = a - 1;
+                b = a;
+            }
+            if a == 0 {
+                return
+            }
+        }
+    })
+    .filter(|&x| check_if_palindrome(x))
+    .max()
+    .unwrap()
+}
+
+fn check_if_palindrome(number: i32) -> bool {
+    let temp = number.to_string();
+    return temp == temp.chars().rev().collect::<String>()
 }
