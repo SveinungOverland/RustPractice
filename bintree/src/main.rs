@@ -19,12 +19,28 @@ impl Node {
         }
     }
 
+    fn has_left(&self) -> bool {
+        self.left.is_some()
+    }
+
+    fn has_right(&self) -> bool {
+        self.right.is_some()
+    }
+
     fn move_left<'a>(&'a mut self) -> Option<&'a mut Box<Node>> {
         self.left.as_mut()
     }
 
     fn move_right<'a>(&'a mut self) -> Option<&'a mut Box<Node>> {
         self.right.as_mut()
+    }
+
+    fn set_left(&mut self, node: Node) {
+        self.left = Some(Box::new(node))
+    }
+
+    fn set_right(&mut self, node: Node) {
+        self.right = Some(Box::new(node))
     }
 
     fn compare<'a>(&'a mut self, value: i32) -> NodeComparison {
@@ -35,34 +51,33 @@ impl Node {
         }
     }
 
-    fn insert<'a>(&'a mut self, value: i32){ 
-        let start_left_or_right = self.compare(value);
-        match start_left_or_right {
-            NodeComparison::MoveLeft => if self.left.is_none() { self.left = Some(Box::new(Node::new(value))); return },
-            NodeComparison::MoveRight => if self.right.is_none() { self.right = Some(Box::new(Node::new(value))); return }
+    
+
+    fn _direct_insert_or_child<'a>(&'a mut self, value: i32) -> Option<&'a mut Box<Node>> {
+        let comparison = self.compare(value);
+        {
+            let has_child: bool = match comparison { NodeComparison::MoveLeft => self.has_left(), NodeComparison::MoveRight => self.has_right() };
+            if has_child {
+                return match comparison { NodeComparison::MoveLeft => self.move_left(), NodeComparison::MoveRight => self.move_right() }
+            };
         }
-        let mut temp: &'a mut Box<Node> = match start_left_or_right {
-            NodeComparison::MoveLeft => self.left.as_mut().unwrap(),
-            NodeComparison::MoveRight => self.right.as_mut().unwrap()
+        let new_node = Node::new(value);
+        match comparison {
+            NodeComparison::MoveLeft => self.set_left(new_node),
+            NodeComparison::MoveRight => self.set_right(new_node)
+        }
+        None
+    }
+
+    fn insert<'a>(&'a mut self, value: i32) {
+        let mut temp: &'a mut Box<Node> = match self._direct_insert_or_child(value) {
+            Some(child) => child,
+            None => return
         };
-        loop {
-            match temp.compare(value) {
-                NodeComparison::MoveLeft => {
-                    if temp.left.is_none() {
-                        temp.left = Some(Box::new(Node::new(value)));
-                        return
-                    } else {
-                        temp = temp.move_left().unwrap()
-                    }
-                },
-                NodeComparison::MoveRight => {
-                    if temp.right.is_none() {
-                        temp.right = Some(Box::new(Node::new(value)));
-                        return
-                    } else {
-                        temp = temp.move_right().unwrap()
-                    }
-                }
+        loop { 
+            temp = match temp._direct_insert_or_child(value) {
+                Some(child) => child,
+                None => return
             }
         }
     }
