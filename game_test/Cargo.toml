@@ -1,0 +1,11 @@
+[package]
+name = "game_test"
+version = "0.1.0"
+authors = ["Sveinung Øverland <sveinungg.overlandd@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ggez = "0.5.1"
+specs = { version = "0.16.1", features = ["specs-derive"] }

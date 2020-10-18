@@ -47,12 +47,10 @@ fn naive() -> i64 {
             i = i + 1; 
         }
     }).take_while(|&x| x < 1_000_000).collect::<Vec<i64>>();
-
     let result = primes.par_iter().filter_map(|&x| {
         let mut consecutive_primes: VecDeque<i64> = VecDeque::new();
         let mut current_index = 0;
         loop {
-            
             let current_sum = consecutive_primes.iter().sum::<i64>();
             if primes[current_index] == x { return None; }
             else if current_sum == x {
